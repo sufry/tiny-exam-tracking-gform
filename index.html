@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#2563eb" />
-  <title>Portal Ujian Online - Native Lock & Anti-Cheat</title>
+  <title>Portal Ujian Online - Anti-Cheat System</title>
 
   <!-- PWA Manifest Inline -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Portal Ujian","short_name":"Ujian","start_url":".","display":"fullscreen","background_color":"#ffffff","theme_color":"#2563eb","orientation":"portrait-primary"}' />
@@ -36,7 +36,6 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
     }
 
     body, html {
@@ -290,38 +289,20 @@
     }
 
     /* ==========================================================================
-       5. BLOCKING MODAL, OVERLAYS & SUMMARY
+       5. NON-CRASHING IN-DOM FULLSCREEN BLOCKING MODAL
        ========================================================================== */
-    .screen-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.96);
-      backdrop-filter: blur(8px);
-      z-index: 2500;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      color: #ffffff;
-      animation: fadeIn 0.2s ease-out;
-      overflow-y: auto;
-    }
-
-    .screen-overlay.active {
-      display: flex;
-    }
-
     .warning-modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(220, 38, 38, 0.94);
-      backdrop-filter: blur(10px);
-      z-index: 2800;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 99999;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      animation: fadeIn 0.15s ease-out;
+      animation: fadeIn 0.2s ease-out;
       overflow-y: auto;
     }
 
@@ -335,7 +316,7 @@
       max-width: 480px;
       width: 100%;
       border-radius: 20px;
-      padding: 28px 24px;
+      padding: 32px 24px;
       text-align: center;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
       border: 3px solid var(--danger);
@@ -344,21 +325,21 @@
     }
 
     .warning-icon {
-      width: 60px;
-      height: 60px;
+      width: 64px;
+      height: 64px;
       background: #fee2e2;
       color: var(--danger);
-      font-size: 2rem;
+      font-size: 2.2rem;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 12px;
+      margin: 0 auto 14px;
       animation: pulse 1s infinite;
     }
 
     .warning-title {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: var(--danger);
       margin-bottom: 6px;
@@ -377,7 +358,7 @@
       border-radius: 12px;
       padding: 14px 16px;
       text-align: left;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .incident-header {
@@ -401,7 +382,7 @@
 
     .incident-body {
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
       color: #991b1b;
       line-height: 1.35;
     }
@@ -411,19 +392,47 @@
       background: var(--danger);
       color: #ffffff;
       border: none;
-      padding: 14px 20px;
-      font-size: 0.95rem;
+      padding: 16px 20px;
+      font-size: 1rem;
       font-weight: 700;
       border-radius: 12px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.4);
     }
 
     .btn-acknowledge:hover {
       background: var(--danger-hover);
     }
 
-    /* Summary Card (Finished State) */
+    .btn-acknowledge:active {
+      transform: scale(0.98);
+    }
+
+    /* ==========================================================================
+       6. OVERLAYS (DISQUALIFIED & SUMMARY AKHIR UJIAN)
+       ========================================================================== */
+    .screen-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #ffffff;
+      animation: fadeIn 0.2s ease-out;
+      overflow-y: auto;
+    }
+
+    .screen-overlay.active {
+      display: flex;
+    }
+
+    /* Summary Card */
     .summary-card {
       background: var(--card-bg);
       color: var(--text);
@@ -573,26 +582,26 @@
        ======================================================================== -->
   <div class="landing-screen" id="landingScreen">
     <div class="landing-card">
-      <div class="landing-badge">🛡️ HARDENED NATIVE LOCK SYSTEM</div>
+      <div class="landing-badge">🛡️ SECURE EXAM SYSTEM</div>
       <h1 class="landing-title">Petunjuk & Aturan Ujian</h1>
       <p class="landing-subtitle">Harap baca peraturan di bawah sebelum memulai ujian.</p>
 
       <div class="rules-list">
         <div class="rule-item">
           <span class="icon">🚫</span>
-          <div><strong>Sistem Lock Layar Penuh:</strong> Browser akan dikunci dalam mode Fullscreen. Dilarang meminimalkan jendela, keluar fullscreen, atau beralih aplikasi.</div>
+          <div><strong>Dilarang Berpindah Tab / Aplikasi:</strong> Setiap kali Anda beralih jendela atau meminimalkan browser, layar akan terkunci seketika.</div>
         </div>
         <div class="rule-item">
           <span class="icon">⚠️</span>
-          <div><strong>Peringatan Blocking Native:</strong> Setiap upaya beralih atau meminimalkan akan langsung memicu dialog blokir browser secara langsung.</div>
-        </div>
-        <div class="rule-item">
-          <span class="icon">⛔</span>
           <div><strong>Maksimal 3x Pelanggaran:</strong> Jika mencapai 3 kali pelanggaran, ujian akan dihentikan seketika dan didiskualifikasi.</div>
         </div>
         <div class="rule-item">
+          <span class="icon">⛶</span>
+          <div><strong>Layar Penuh:</strong> Menekan tombol mulai akan otomatis mengunci tampilan ke mode layar penuh.</div>
+        </div>
+        <div class="rule-item">
           <span class="icon">📋</span>
-          <div><strong>Audit Trail Log:</strong> Seluruh riwayat aktivitas akan dicatat dan dirangkum pada laporan akhir ujian.</div>
+          <div><strong>Audit Trail Log:</strong> Seluruh riwayat catatan pelanggaran akan dirangkum pada laporan akhir ujian.</div>
         </div>
       </div>
 
@@ -634,14 +643,14 @@
   </main>
 
   <!-- ========================================================================
-       4. INTERACTIVE BLOCKING WARNING MODAL (Layar Terkunci saat Pelanggaran)
+       4. NON-CRASHING BLOCKING MODAL (Layar Terkunci & Aman untuk Safari/Chrome)
        ======================================================================== -->
   <div class="warning-modal-overlay" id="warningModal">
     <div class="warning-card">
       <div class="warning-icon">⚠️</div>
       <h2 class="warning-title">PERINGATAN PELANGGARAN!</h2>
       <p class="warning-desc">
-        Sistem mendeteksi Anda telah meminimalkan browser atau beralih aplikasi.
+        Sistem mendeteksi bahwa Anda telah meminimalkan browser, beralih tab, atau membuka aplikasi lain.
       </p>
 
       <div class="incident-highlight">
@@ -655,7 +664,7 @@
       </div>
 
       <button class="btn-acknowledge" id="btnAcknowledge" type="button">
-        Saya Mengerti & Kunci Layar Kembali
+        Saya Mengerti & Lanjutkan Ujian
       </button>
     </div>
   </div>
@@ -707,7 +716,7 @@
   </div>
 
   <!-- ========================================================================
-       JAVASCRIPT ANTI-CHEAT LOGIC
+       JAVASCRIPT ANTI-CHEAT LOGIC (STABLE & SAFARI COMPATIBLE)
        ======================================================================== -->
   <script>
     (function () {
@@ -717,7 +726,8 @@
       const CONFIG = {
         FORM_URL: 'https://forms.gle/gcQcHE4tf2fXVpBB9',
         MAX_VIOLATIONS: 3,
-        EVENT_DEBOUNCE_MS: 1000
+        // Cooldown aman setelah modal ditutup agar fokus transisi tidak terhitung pelanggaran lagi
+        RESUME_COOLDOWN_MS: 1500
       };
 
       /* 2. APPLICATION STATE */
@@ -725,10 +735,10 @@
         isStarted: false,
         isTerminated: false,
         isCompleted: false,
+        isModalOpen: false, // Flag penahan event agar tidak double count saat modal terbuka
+        isMuted: false,     // Cooldown penahan setelah klik tombol acknowledge
         violations: 0,
         durationSeconds: 0,
-        lastViolationTimestamp: 0,
-        isAlertActive: false,
         violationLogs: []
       };
 
@@ -795,16 +805,18 @@
         },
 
         showWarningModal(latest) {
+          State.isModalOpen = true; // Kunci state: Jangan terima event pelanggaran baru selama modal tampil
           this.incidentNumber.textContent = latest.id;
           this.incidentTimestamp.textContent = latest.timeStr;
           this.incidentDescription.textContent = latest.reason;
 
           this.warningModal.classList.add('active');
-          if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+          if (navigator.vibrate) navigator.vibrate([250, 100, 250]);
         },
 
         hideWarningModal() {
           this.warningModal.classList.remove('active');
+          State.isModalOpen = false;
         },
 
         renderDisqualified(logs) {
@@ -896,7 +908,7 @@
         }
       };
 
-      /* 5. HARDENED ANTI-CHEAT & NATIVE BLOCKING TRACKER */
+      /* 5. STABLE ZERO-CRASH ANTI-CHEAT TRACKER */
       const Tracker = {
         boundHandlers: {},
 
@@ -915,100 +927,65 @@
           window.addEventListener('beforeunload', this.boundHandlers.beforeUnload, false);
           window.addEventListener('keydown', this.boundHandlers.keyDown, false);
 
-          this.enableFullscreenAndKeyboardLock();
+          this.requestFullscreenMode();
         },
 
-        enableFullscreenAndKeyboardLock() {
-          // Request Fullscreen
-          if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-          }
-
-          // Chrome Keyboard Lock API (Mengunci tombol Esc, Cmd, Alt)
-          if (navigator.keyboard && navigator.keyboard.lock) {
-            navigator.keyboard.lock(['Escape', 'Tab', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight']).catch(() => {});
-          }
+        requestFullscreenMode() {
+          try {
+            if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+              document.documentElement.requestFullscreen().catch(() => {});
+            }
+          } catch (e) {}
         },
 
         canTriggerViolation() {
-          if (State.isAlertActive) return false;
-          const now = Date.now();
-          if (now - State.lastViolationTimestamp < CONFIG.EVENT_DEBOUNCE_MS) {
-            return false;
-          }
-          State.lastViolationTimestamp = now;
+          // Abaikan jika ujian belum mulai, sudah selesai, modal sedang terbuka, atau dalam masa cooldown setelah klik tombol
+          if (!State.isStarted || State.isTerminated || State.isCompleted) return false;
+          if (State.isModalOpen || State.isMuted) return false;
           return true;
         },
 
-        /* NATIVE SYNCHRONOUS BLOCKING TRIGGER */
-        triggerNativeBlock(reason) {
-          if (!this.canTriggerViolation()) return;
-
-          State.isAlertActive = true;
-          this.onViolation(reason);
-
-          // Panggil Native Synchronous alert() untuk memblokir aktivitas browser secara seketika!
-          const currentCount = State.violations;
-          const maxCount = CONFIG.MAX_VIOLATIONS;
-
-          if (currentCount < maxCount) {
-            // Native Modal alert() membekukan eksekusi JS dan menarik fokus kembali ke jendela
-            setTimeout(() => {
-              window.alert(
-                `🚨 [PERINGATAN PELANGGARAN #${currentCount}/${maxCount}]\n\n` +
-                `Penyebab: ${reason}\n\n` +
-                `Dilarang meminimalkan jendela browser, beralih aplikasi, atau keluar dari layar penuh!\n` +
-                `Klik OK untuk mengunci kembali layar ujian.`
-              );
-              State.isAlertActive = false;
-              // Paksa kembali layar penuh dan fokus
-              this.enableFullscreenAndKeyboardLock();
-              window.focus();
-            }, 10);
-          } else {
-            State.isAlertActive = false;
-          }
-        },
-
         handleVisibilityChange() {
-          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
-
           if (document.visibilityState === 'hidden') {
-            this.triggerNativeBlock('Meminimalkan Jendela / Beralih Tab');
+            if (this.canTriggerViolation()) {
+              this.onViolation('Beralih Tab / Minimize Jendela');
+            }
           }
         },
 
         handleWindowBlur() {
-          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
-          
+          // Berikan jeda kecil untuk memeriksa apakah fokus pindah ke dalam iframe form
           setTimeout(() => {
+            if (!this.canTriggerViolation()) return;
+
+            // Jika elemen aktif adalah iframe, ini interaksi valid pengisian formulir
             if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
-              return; // Aktivitas pengisian di dalam iframe Google Form
+              return;
             }
-            this.triggerNativeBlock('Kehilangan Fokus (Klik di Luar Jendela / Buka Aplikasi Lain)');
-          }, 100);
+
+            this.onViolation('Kehilangan Fokus (Lost Focus / Beralih Aplikasi)');
+          }, 150);
         },
 
         handleFullscreenChange() {
-          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
           if (!document.fullscreenElement) {
-            this.triggerNativeBlock('Keluar dari Mode Layar Penuh (Fullscreen Exited)');
+            if (this.canTriggerViolation()) {
+              this.onViolation('Keluar dari Mode Layar Penuh (Fullscreen Exited)');
+            }
           }
         },
 
         handleKeyDown(e) {
           if (!State.isStarted || State.isTerminated || State.isCompleted) return;
-          // Blokir shortcut tombol keyboard umum
+
+          // Cegah tombol refresh atau penutupan tab
           if (
             e.key === 'F5' || 
-            e.key === 'F11' ||
-            (e.metaKey && (e.key === 'm' || e.key === 'h' || e.key === 'w' || e.key === 'q')) || // Cmd+M / Cmd+H / Cmd+W di Mac
-            (e.ctrlKey && (e.key === 'r' || e.key === 'w' || e.key === 't' || e.key === 'n'))
+            (e.metaKey && (e.key === 'r' || e.key === 'w')) ||
+            (e.ctrlKey && (e.key === 'r' || e.key === 'w' || e.key === 't'))
           ) {
             e.preventDefault();
             e.stopPropagation();
-            this.triggerNativeBlock('Mencoba Menekan Pintasan Keyboard (Shortcut)');
-            return false;
           }
         },
 
@@ -1019,15 +996,27 @@
           return e.returnValue;
         },
 
+        // Dipanggil saat peserta menekan tombol "Saya Mengerti & Lanjutkan Ujian"
+        resumeAfterAcknowledgment() {
+          UI.hideWarningModal();
+          State.isMuted = true;
+
+          // Kembalikan fokus dan layar penuh
+          window.focus();
+          this.requestFullscreenMode();
+
+          // Berikan grace cooldown 1.5 detik agar transisi fokus tombol tidak memicu pelanggaran baru
+          setTimeout(() => {
+            State.isMuted = false;
+          }, CONFIG.RESUME_COOLDOWN_MS);
+        },
+
         stop() {
           document.removeEventListener('visibilitychange', this.boundHandlers.visibilityChange);
           window.removeEventListener('blur', this.boundHandlers.windowBlur);
           document.removeEventListener('fullscreenchange', this.boundHandlers.fullscreenChange);
           window.removeEventListener('beforeunload', this.boundHandlers.beforeUnload);
           window.removeEventListener('keydown', this.boundHandlers.keyDown);
-          if (navigator.keyboard && navigator.keyboard.unlock) {
-            navigator.keyboard.unlock();
-          }
           this.boundHandlers = {};
         }
       };
@@ -1040,18 +1029,20 @@
         },
 
         bindEvents() {
+          // Mulai Ujian
           UI.btnStart.addEventListener('click', () => this.startExam());
 
+          // Tombol Kembali ke Ujian pada Modal
           UI.btnAcknowledge.addEventListener('click', () => {
-            UI.hideWarningModal();
-            Tracker.enableFullscreenAndKeyboardLock();
-            window.focus();
+            Tracker.resumeAfterAcknowledgment();
           });
 
+          // Tombol Fullscreen Manual
           UI.btnFullscreen.addEventListener('click', () => {
-            Tracker.enableFullscreenAndKeyboardLock();
+            Tracker.requestFullscreenMode();
           });
 
+          // Tombol Selesai Ujian
           UI.btnFinish.addEventListener('click', () => {
             const confirmed = window.confirm(
               'Apakah Anda yakin sudah menekan tombol Kirim / Submit di dalam lembar Google Form?'
