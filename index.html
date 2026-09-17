@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>Portal Ujian Online - Native Lock & Anti-Cheat</title>
+
+  <!-- PWA Manifest Inline -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Portal Ujian","short_name":"Ujian","start_url":".","display":"fullscreen","background_color":"#ffffff","theme_color":"#2563eb","orientation":"portrait-primary"}' />
+
+  <style>
+    /* ==========================================================================
+       1. VARIABLES & RESET
+       ========================================================================== */
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --warning: #f59e0b;
+      --success: #16a34a;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --topbar-height: 64px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ==========================================================================
+       2. LANDING PAGE / INTRO SCREEN
+       ========================================================================== */
+    .landing-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 3000;
+      overflow-y: auto;
+    }
+
+    .landing-screen.hidden {
+      display: none;
+    }
+
+    .landing-card {
+      background: var(--card-bg);
+      color: var(--text);
+      max-width: 560px;
+      width: 100%;
+      border-radius: 20px;
+      padding: 36px 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .landing-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .landing-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .landing-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .rules-list {
+      text-align: left;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+
+    .rule-item span.icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .btn-start {
+      width: 100%;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 16px 24px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-start:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-start:active {
+      transform: scale(0.98);
+    }
+
+    /* ==========================================================================
+       3. TOPBAR (STICKY STATUS & NAVIGATION)
+       ========================================================================== */
+    header.exam-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--topbar-height);
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      padding-top: env(safe-area-inset-top, 0px);
+      z-index: 1000;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: #ecfdf5;
+      color: var(--success);
+      border: 1px solid #a7f3d0;
+      transition: all 0.2s ease;
+    }
+
+    .badge-counter.warning {
+      background: #fffbeb;
+      color: var(--warning);
+      border-color: #fde68a;
+    }
+
+    .badge-counter.danger {
+      background: #fef2f2;
+      color: var(--danger);
+      border-color: #fecaca;
+      animation: pulse 1.2s infinite;
+    }
+
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: #f1f5f9;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-fullscreen {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      min-height: 40px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      min-height: 40px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s ease, transform 0.1s;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    /* ==========================================================================
+       4. CONTAINER & IFRAME
+       ========================================================================== */
+    main.exam-container {
+      position: absolute;
+      top: calc(var(--topbar-height) + env(safe-area-inset-top, 0px));
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: calc(100% - var(--topbar-height) - env(safe-area-inset-top, 0px));
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    iframe.form-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ==========================================================================
+       5. BLOCKING MODAL, OVERLAYS & SUMMARY
+       ========================================================================== */
+    .screen-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(8px);
+      z-index: 2500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #ffffff;
+      animation: fadeIn 0.2s ease-out;
+      overflow-y: auto;
+    }
+
+    .screen-overlay.active {
+      display: flex;
+    }
+
+    .warning-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(220, 38, 38, 0.94);
+      backdrop-filter: blur(10px);
+      z-index: 2800;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.15s ease-out;
+      overflow-y: auto;
+    }
+
+    .warning-modal-overlay.active {
+      display: flex;
+    }
+
+    .warning-card {
+      background: #ffffff;
+      color: var(--text);
+      max-width: 480px;
+      width: 100%;
+      border-radius: 20px;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      border: 3px solid var(--danger);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .warning-icon {
+      width: 60px;
+      height: 60px;
+      background: #fee2e2;
+      color: var(--danger);
+      font-size: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      animation: pulse 1s infinite;
+    }
+
+    .warning-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--danger);
+      margin-bottom: 6px;
+    }
+
+    .warning-desc {
+      font-size: 0.925rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .incident-highlight {
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    .incident-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--danger);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .incident-time {
+      background: #fee2e2;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    .incident-body {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #991b1b;
+      line-height: 1.35;
+    }
+
+    .btn-acknowledge {
+      width: 100%;
+      background: var(--danger);
+      color: #ffffff;
+      border: none;
+      padding: 14px 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-acknowledge:hover {
+      background: var(--danger-hover);
+    }
+
+    /* Summary Card (Finished State) */
+    .summary-card {
+      background: var(--card-bg);
+      color: var(--text);
+      padding: 32px 24px;
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      text-align: left;
+    }
+
+    .summary-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .summary-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .summary-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .summary-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .summary-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    /* Audit Trail Table/List */
+    .audit-section {
+      margin-top: 16px;
+    }
+
+    .audit-title {
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .audit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .audit-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.825rem;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .audit-item:last-child {
+      border-bottom: none;
+    }
+
+    .audit-item span.desc {
+      color: #991b1b;
+      font-weight: 600;
+    }
+
+    .audit-item span.time {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .audit-clean-badge {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: var(--success);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       1. LANDING PAGE / INTRO SCREEN
+       ======================================================================== -->
+  <div class="landing-screen" id="landingScreen">
+    <div class="landing-card">
+      <div class="landing-badge">🛡️ HARDENED NATIVE LOCK SYSTEM</div>
+      <h1 class="landing-title">Petunjuk & Aturan Ujian</h1>
+      <p class="landing-subtitle">Harap baca peraturan di bawah sebelum memulai ujian.</p>
+
+      <div class="rules-list">
+        <div class="rule-item">
+          <span class="icon">🚫</span>
+          <div><strong>Sistem Lock Layar Penuh:</strong> Browser akan dikunci dalam mode Fullscreen. Dilarang meminimalkan jendela, keluar fullscreen, atau beralih aplikasi.</div>
+        </div>
+        <div class="rule-item">
+          <span class="icon">⚠️</span>
+          <div><strong>Peringatan Blocking Native:</strong> Setiap upaya beralih atau meminimalkan akan langsung memicu dialog blokir browser secara langsung.</div>
+        </div>
+        <div class="rule-item">
+          <span class="icon">⛔</span>
+          <div><strong>Maksimal 3x Pelanggaran:</strong> Jika mencapai 3 kali pelanggaran, ujian akan dihentikan seketika dan didiskualifikasi.</div>
+        </div>
+        <div class="rule-item">
+          <span class="icon">📋</span>
+          <div><strong>Audit Trail Log:</strong> Seluruh riwayat aktivitas akan dicatat dan dirangkum pada laporan akhir ujian.</div>
+        </div>
+      </div>
+
+      <button class="btn-start" id="btnStartExam" type="button">
+        <span>Mulai Ujian Sekarang</span>
+        <span>➔</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       2. TOPBAR HEADER
+       ======================================================================== -->
+  <header class="exam-header" id="examHeader">
+    <div class="header-left">
+      <div class="badge-counter" id="violationBadge" aria-live="polite">
+        <span>🛡️</span>
+        <span>Pelanggaran: <strong id="violationCount">0</strong> / <span id="maxViolations">3</span></span>
+      </div>
+      <div class="timer-badge" id="timerBadge">
+        <span>⏱️</span>
+        <span id="timerDisplay">00:00:00</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-fullscreen" id="btnFullscreen" type="button" title="Layar Penuh">⛶ Layar Penuh</button>
+      <button class="btn-submit" id="btnFinishExam" type="button">
+        <span>✓</span>
+        <span>Saya Sudah Submit Form</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       3. MAIN EXAM CONTAINER
+       ======================================================================== -->
+  <main class="exam-container" id="examContainer">
+    <!-- Iframe di-render secara dinamis saat user menekan 'Mulai Ujian' -->
+  </main>
+
+  <!-- ========================================================================
+       4. INTERACTIVE BLOCKING WARNING MODAL (Layar Terkunci saat Pelanggaran)
+       ======================================================================== -->
+  <div class="warning-modal-overlay" id="warningModal">
+    <div class="warning-card">
+      <div class="warning-icon">⚠️</div>
+      <h2 class="warning-title">PERINGATAN PELANGGARAN!</h2>
+      <p class="warning-desc">
+        Sistem mendeteksi Anda telah meminimalkan browser atau beralih aplikasi.
+      </p>
+
+      <div class="incident-highlight">
+        <div class="incident-header">
+          <span>Pelanggaran #<span id="incidentNumber">1</span></span>
+          <span class="incident-time" id="incidentTimestamp">00:00:00 WIB</span>
+        </div>
+        <div class="incident-body" id="incidentDescription">
+          Kehilangan fokus layar / membuka aplikasi lain
+        </div>
+      </div>
+
+      <button class="btn-acknowledge" id="btnAcknowledge" type="button">
+        Saya Mengerti & Kunci Layar Kembali
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       5. OVERLAYS (DISQUALIFIED & SUMMARY AKHIR UJIAN)
+       ======================================================================== -->
+  <!-- 1. Banned / Disqualified Screen -->
+  <div class="screen-overlay" id="overlayDisqualified">
+    <div class="summary-card" style="border: 2px solid var(--danger);">
+      <div class="summary-header">
+        <div class="summary-icon" style="background: #fee2e2; color: var(--danger);">✕</div>
+        <h2 class="summary-title" style="color: var(--danger);">Akses Ujian Dibatalkan</h2>
+        <p class="summary-subtitle">Mencapai batas maksimal 3 kali pelanggaran.</p>
+      </div>
+
+      <div class="audit-section">
+        <div class="audit-title" style="color: var(--danger);">Bukti Rekam Jejak Pelanggaran:</div>
+        <div class="audit-list" id="disqualifiedAuditList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Final Summary Screen (Setelah Klik "Saya Sudah Submit Form") -->
+  <div class="screen-overlay" id="overlayFinished">
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-icon">✓</div>
+        <h2 class="summary-title">Ujian Berhasil Diserahkan</h2>
+        <p class="summary-subtitle">Ringkasan sesi pengerjaan ujian dan catatan aktivitas Anda.</p>
+      </div>
+
+      <div class="summary-stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">⏱️ Total Durasi Ujian</div>
+          <div class="stat-value" id="summaryDuration">00:00:00</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">🛡️ Total Pelanggaran</div>
+          <div class="stat-value" id="summaryViolations">0 / 3</div>
+        </div>
+      </div>
+
+      <div class="audit-section">
+        <div class="audit-title">📋 Audit Trail Log Aktivitas:</div>
+        <div id="summaryAuditContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       JAVASCRIPT ANTI-CHEAT LOGIC
+       ======================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* 1. CONFIGURATION */
+      const CONFIG = {
+        FORM_URL: 'https://forms.gle/gcQcHE4tf2fXVpBB9',
+        MAX_VIOLATIONS: 3,
+        EVENT_DEBOUNCE_MS: 1000
+      };
+
+      /* 2. APPLICATION STATE */
+      const State = {
+        isStarted: false,
+        isTerminated: false,
+        isCompleted: false,
+        violations: 0,
+        durationSeconds: 0,
+        lastViolationTimestamp: 0,
+        isAlertActive: false,
+        violationLogs: []
+      };
+
+      /* 3. UI CONTROLLER */
+      const UI = {
+        landingScreen: document.getElementById('landingScreen'),
+        btnStart: document.getElementById('btnStartExam'),
+        container: document.getElementById('examContainer'),
+        badge: document.getElementById('violationBadge'),
+        count: document.getElementById('violationCount'),
+        max: document.getElementById('maxViolations'),
+        timerDisplay: document.getElementById('timerDisplay'),
+        btnFullscreen: document.getElementById('btnFullscreen'),
+        btnFinish: document.getElementById('btnFinishExam'),
+        warningModal: document.getElementById('warningModal'),
+        incidentNumber: document.getElementById('incidentNumber'),
+        incidentTimestamp: document.getElementById('incidentTimestamp'),
+        incidentDescription: document.getElementById('incidentDescription'),
+        btnAcknowledge: document.getElementById('btnAcknowledge'),
+        overlayDisqualified: document.getElementById('overlayDisqualified'),
+        overlayFinished: document.getElementById('overlayFinished'),
+        disqualifiedAuditList: document.getElementById('disqualifiedAuditList'),
+        summaryDuration: document.getElementById('summaryDuration'),
+        summaryViolations: document.getElementById('summaryViolations'),
+        summaryAuditContainer: document.getElementById('summaryAuditContainer'),
+
+        init() {
+          this.max.textContent = CONFIG.MAX_VIOLATIONS;
+        },
+
+        mountFormIframe(url) {
+          const iframe = document.createElement('iframe');
+          iframe.id = 'formIframe';
+          iframe.className = 'form-iframe';
+          iframe.src = url;
+          iframe.title = 'Google Form Ujian';
+          iframe.setAttribute('allow', 'fullscreen');
+          this.container.innerHTML = '';
+          this.container.appendChild(iframe);
+        },
+
+        removeFormIframe() {
+          this.container.innerHTML = '';
+        },
+
+        hideLanding() {
+          this.landingScreen.classList.add('hidden');
+        },
+
+        updateCounter(n) {
+          this.count.textContent = n;
+          this.badge.className = 'badge-counter' + (n === 1 ? ' warning' : n >= 2 ? ' danger' : '');
+        },
+
+        formatTime(seconds) {
+          const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+          const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+          const secs = String(seconds % 60).padStart(2, '0');
+          return `${hrs}:${mins}:${secs}`;
+        },
+
+        updateTimer(secondsElapsed) {
+          this.timerDisplay.textContent = this.formatTime(secondsElapsed);
+        },
+
+        showWarningModal(latest) {
+          this.incidentNumber.textContent = latest.id;
+          this.incidentTimestamp.textContent = latest.timeStr;
+          this.incidentDescription.textContent = latest.reason;
+
+          this.warningModal.classList.add('active');
+          if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+        },
+
+        hideWarningModal() {
+          this.warningModal.classList.remove('active');
+        },
+
+        renderDisqualified(logs) {
+          this.hideWarningModal();
+          this.removeFormIframe();
+
+          this.disqualifiedAuditList.innerHTML = logs.map(item => `
+            <div class="audit-item">
+              <span class="desc">#${item.id} ${item.reason}</span>
+              <span class="time">${item.timeStr}</span>
+            </div>
+          `).join('');
+
+          this.overlayDisqualified.classList.add('active');
+        },
+
+        renderSummary(durationSeconds, violations, logs) {
+          this.hideWarningModal();
+          this.removeFormIframe();
+
+          this.summaryDuration.textContent = this.formatTime(durationSeconds);
+          this.summaryViolations.textContent = `${violations} / ${CONFIG.MAX_VIOLATIONS}`;
+
+          if (logs.length === 0) {
+            this.summaryAuditContainer.innerHTML = `
+              <div class="audit-clean-badge">
+                <span>🛡️</span>
+                <span>Sempurna! Tidak ada rekam jejak pelanggaran atau kehilangan fokus selama ujian.</span>
+              </div>
+            `;
+          } else {
+            this.summaryAuditContainer.innerHTML = `
+              <div class="audit-list">
+                ${logs.map(item => `
+                  <div class="audit-item">
+                    <span class="desc">#${item.id} ${item.reason}</span>
+                    <span class="time">${item.timeStr}</span>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }
+
+          this.overlayFinished.classList.add('active');
+        }
+      };
+
+      /* 4. BACKGROUND TIMER WORKER */
+      const TimerWorkerManager = {
+        worker: null,
+        init(onTick) {
+          const workerScript = `
+            let timer = null;
+            let seconds = 0;
+            self.onmessage = function(e) {
+              if (e.data === 'start') {
+                if (!timer) {
+                  timer = setInterval(() => {
+                    seconds++;
+                    self.postMessage({ type: 'tick', seconds: seconds });
+                  }, 1000);
+                }
+              } else if (e.data === 'stop') {
+                if (timer) { clearInterval(timer); timer = null; }
+              }
+            };
+          `;
+          try {
+            const blob = new Blob([workerScript], { type: 'application/javascript' });
+            this.worker = new Worker(URL.createObjectURL(blob));
+            this.worker.onmessage = (e) => {
+              if (e.data.type === 'tick' && onTick) onTick(e.data.seconds);
+            };
+            this.worker.postMessage('start');
+          } catch (e) {
+            this._fallbackTimer = setInterval(() => {
+              this._sec = (this._sec || 0) + 1;
+              if (onTick) onTick(this._sec);
+            }, 1000);
+          }
+        },
+        stop() {
+          if (this.worker) {
+            this.worker.postMessage('stop');
+            this.worker.terminate();
+            this.worker = null;
+          }
+          if (this._fallbackTimer) clearInterval(this._fallbackTimer);
+        }
+      };
+
+      /* 5. HARDENED ANTI-CHEAT & NATIVE BLOCKING TRACKER */
+      const Tracker = {
+        boundHandlers: {},
+
+        start(onViolationCallback) {
+          this.onViolation = onViolationCallback;
+
+          this.boundHandlers.visibilityChange = this.handleVisibilityChange.bind(this);
+          this.boundHandlers.windowBlur = this.handleWindowBlur.bind(this);
+          this.boundHandlers.fullscreenChange = this.handleFullscreenChange.bind(this);
+          this.boundHandlers.beforeUnload = this.handleBeforeUnload.bind(this);
+          this.boundHandlers.keyDown = this.handleKeyDown.bind(this);
+
+          document.addEventListener('visibilitychange', this.boundHandlers.visibilityChange, false);
+          window.addEventListener('blur', this.boundHandlers.windowBlur, false);
+          document.addEventListener('fullscreenchange', this.boundHandlers.fullscreenChange, false);
+          window.addEventListener('beforeunload', this.boundHandlers.beforeUnload, false);
+          window.addEventListener('keydown', this.boundHandlers.keyDown, false);
+
+          this.enableFullscreenAndKeyboardLock();
+        },
+
+        enableFullscreenAndKeyboardLock() {
+          // Request Fullscreen
+          if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          }
+
+          // Chrome Keyboard Lock API (Mengunci tombol Esc, Cmd, Alt)
+          if (navigator.keyboard && navigator.keyboard.lock) {
+            navigator.keyboard.lock(['Escape', 'Tab', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight']).catch(() => {});
+          }
+        },
+
+        canTriggerViolation() {
+          if (State.isAlertActive) return false;
+          const now = Date.now();
+          if (now - State.lastViolationTimestamp < CONFIG.EVENT_DEBOUNCE_MS) {
+            return false;
+          }
+          State.lastViolationTimestamp = now;
+          return true;
+        },
+
+        /* NATIVE SYNCHRONOUS BLOCKING TRIGGER */
+        triggerNativeBlock(reason) {
+          if (!this.canTriggerViolation()) return;
+
+          State.isAlertActive = true;
+          this.onViolation(reason);
+
+          // Panggil Native Synchronous alert() untuk memblokir aktivitas browser secara seketika!
+          const currentCount = State.violations;
+          const maxCount = CONFIG.MAX_VIOLATIONS;
+
+          if (currentCount < maxCount) {
+            // Native Modal alert() membekukan eksekusi JS dan menarik fokus kembali ke jendela
+            setTimeout(() => {
+              window.alert(
+                `🚨 [PERINGATAN PELANGGARAN #${currentCount}/${maxCount}]\n\n` +
+                `Penyebab: ${reason}\n\n` +
+                `Dilarang meminimalkan jendela browser, beralih aplikasi, atau keluar dari layar penuh!\n` +
+                `Klik OK untuk mengunci kembali layar ujian.`
+              );
+              State.isAlertActive = false;
+              // Paksa kembali layar penuh dan fokus
+              this.enableFullscreenAndKeyboardLock();
+              window.focus();
+            }, 10);
+          } else {
+            State.isAlertActive = false;
+          }
+        },
+
+        handleVisibilityChange() {
+          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
+
+          if (document.visibilityState === 'hidden') {
+            this.triggerNativeBlock('Meminimalkan Jendela / Beralih Tab');
+          }
+        },
+
+        handleWindowBlur() {
+          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
+          
+          setTimeout(() => {
+            if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
+              return; // Aktivitas pengisian di dalam iframe Google Form
+            }
+            this.triggerNativeBlock('Kehilangan Fokus (Klik di Luar Jendela / Buka Aplikasi Lain)');
+          }, 100);
+        },
+
+        handleFullscreenChange() {
+          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
+          if (!document.fullscreenElement) {
+            this.triggerNativeBlock('Keluar dari Mode Layar Penuh (Fullscreen Exited)');
+          }
+        },
+
+        handleKeyDown(e) {
+          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
+          // Blokir shortcut tombol keyboard umum
+          if (
+            e.key === 'F5' || 
+            e.key === 'F11' ||
+            (e.metaKey && (e.key === 'm' || e.key === 'h' || e.key === 'w' || e.key === 'q')) || // Cmd+M / Cmd+H / Cmd+W di Mac
+            (e.ctrlKey && (e.key === 'r' || e.key === 'w' || e.key === 't' || e.key === 'n'))
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.triggerNativeBlock('Mencoba Menekan Pintasan Keyboard (Shortcut)');
+            return false;
+          }
+        },
+
+        handleBeforeUnload(e) {
+          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
+          e.preventDefault();
+          e.returnValue = 'Ujian sedang berlangsung!';
+          return e.returnValue;
+        },
+
+        stop() {
+          document.removeEventListener('visibilitychange', this.boundHandlers.visibilityChange);
+          window.removeEventListener('blur', this.boundHandlers.windowBlur);
+          document.removeEventListener('fullscreenchange', this.boundHandlers.fullscreenChange);
+          window.removeEventListener('beforeunload', this.boundHandlers.beforeUnload);
+          window.removeEventListener('keydown', this.boundHandlers.keyDown);
+          if (navigator.keyboard && navigator.keyboard.unlock) {
+            navigator.keyboard.unlock();
+          }
+          this.boundHandlers = {};
+        }
+      };
+
+      /* 6. APP COORDINATOR */
+      const App = {
+        init() {
+          UI.init();
+          this.bindEvents();
+        },
+
+        bindEvents() {
+          UI.btnStart.addEventListener('click', () => this.startExam());
+
+          UI.btnAcknowledge.addEventListener('click', () => {
+            UI.hideWarningModal();
+            Tracker.enableFullscreenAndKeyboardLock();
+            window.focus();
+          });
+
+          UI.btnFullscreen.addEventListener('click', () => {
+            Tracker.enableFullscreenAndKeyboardLock();
+          });
+
+          UI.btnFinish.addEventListener('click', () => {
+            const confirmed = window.confirm(
+              'Apakah Anda yakin sudah menekan tombol Kirim / Submit di dalam lembar Google Form?'
+            );
+            if (confirmed) {
+              this.completeExam();
+            }
+          });
+        },
+
+        startExam() {
+          State.isStarted = true;
+
+          UI.hideLanding();
+          UI.mountFormIframe(CONFIG.FORM_URL);
+
+          TimerWorkerManager.init((seconds) => {
+            State.durationSeconds = seconds;
+            UI.updateTimer(seconds);
+          });
+
+          Tracker.start((reason) => this.handleViolation(reason));
+        },
+
+        handleViolation(reason) {
+          if (!State.isStarted || State.isTerminated || State.isCompleted) return;
+
+          State.violations += 1;
+          
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          }) + ' WIB';
+
+          const incident = {
+            id: State.violations,
+            reason: reason,
+            timeStr: timeStr,
+            timestamp: Date.now()
+          };
+
+          State.violationLogs.push(incident);
+          UI.updateCounter(State.violations);
+
+          if (State.violations >= CONFIG.MAX_VIOLATIONS) {
+            this.terminateExam();
+          } else {
+            UI.showWarningModal(incident);
+          }
+        },
+
+        terminateExam() {
+          State.isTerminated = true;
+          Tracker.stop();
+          TimerWorkerManager.stop();
+          UI.renderDisqualified(State.violationLogs);
+        },
+
+        completeExam() {
+          State.isCompleted = true;
+          Tracker.stop();
+          TimerWorkerManager.stop();
+          UI.renderSummary(State.durationSeconds, State.violations, State.violationLogs);
+        }
+      };
+
+      document.addEventListener('DOMContentLoaded', () => App.init());
+    })();
+  </script>
+</body>
+</html>
